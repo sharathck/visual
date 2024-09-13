@@ -4,15 +4,43 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   MarkerType,
+  addEdge,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './App.css';
 
+function CustomNode({ data }) {
+  return (
+    <div
+      style={{
+        padding: 10,
+        border: '1px solid #777',
+        borderRadius: 5,
+        backgroundColor: '#fff',
+        position: 'relative',
+      }}
+    >
+      {data.label}
+      {/* Add handles on the left and right sides */}
+      <Handle type="target" position={Position.Left} id="left" />
+      <Handle type="source" position={Position.Right} id="right" />
+    </div>
+  );
+}
+
 function App() {
-  const [inputText, setInputText] = useState('Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase -> Receive\nReceive -> Payment\nPayment -> GL');
+  const [inputText, setInputText] = useState(
+    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase -> Receive\nReceive -> Payment\nPayment -> GL'
+  );
+
   // Initialize nodes and edges state using React Flow hooks
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  // Define the custom node types
+  const nodeTypes = { custom: CustomNode };
 
   // Function to parse the input text
   const parseInput = () => {
@@ -34,6 +62,7 @@ function App() {
         if (!tempNodes[sourceApp]) {
           tempNodes[sourceApp] = {
             id: sourceApp,
+            type: 'custom', // Use the custom node type
             data: { label: sourceApp },
             position: { x: Math.random() * 800, y: Math.random() * 600 },
           };
@@ -41,6 +70,7 @@ function App() {
         if (!tempNodes[targetApp]) {
           tempNodes[targetApp] = {
             id: targetApp,
+            type: 'custom', // Use the custom node type
             data: { label: targetApp },
             position: { x: Math.random() * 800, y: Math.random() * 600 },
           };
@@ -51,6 +81,8 @@ function App() {
           id: `e${sourceApp}-${targetApp}`,
           source: sourceApp,
           target: targetApp,
+          sourceHandle: 'right',
+          targetHandle: 'left',
           markerEnd: {
             type: MarkerType.ArrowClosed,
           },
@@ -61,6 +93,7 @@ function App() {
         if (!tempNodes[appName]) {
           tempNodes[appName] = {
             id: appName,
+            type: 'custom', // Use the custom node type
             data: { label: appName },
             position: { x: Math.random() * 800, y: Math.random() * 600 },
           };
@@ -72,6 +105,15 @@ function App() {
     setNodes(Object.values(tempNodes));
     setEdges(tempEdges);
   };
+
+  // Handle edge creation by dragging from handles
+  const onConnect = (params) =>
+    setEdges((eds) =>
+      addEdge(
+        { ...params, markerEnd: { type: MarkerType.ArrowClosed } },
+        eds
+      )
+    );
 
   return (
     <div className="App">
@@ -89,6 +131,8 @@ function App() {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
             fitView
           />
         </ReactFlowProvider>
