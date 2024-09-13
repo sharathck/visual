@@ -9,7 +9,7 @@ import 'reactflow/dist/style.css';
 import './App.css';
 
 function App() {
-  const [inputText, setInputText] = useState('a\nb\na -> b');
+  const [inputText, setInputText] = useState('Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase -> Receive\nReceive -> Payment\nPayment -> GL');
   // Initialize nodes and edges state using React Flow hooks
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
