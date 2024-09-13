@@ -104,10 +104,6 @@ function App() {
           targetHandle: targetHandle,
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            fill: 'black',
-            strokeWidth: 3,
-            width: 20,
-            height: 20,
           },
         });
       } else {
