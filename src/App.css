@@ -1,13 +1,18 @@
 .App {
   display: flex;
-  height: 100vh;
+  height: 98vh;
   margin: 0;
   font-family: Arial, sans-serif;
+  position: relative;
+}
+
+.parseButton {
+  position: relative;
 }
 
 .left-panel {
-  flex: 0 0 20%;
-  max-width: 20%;
+  flex: 0 0 16%;
+  max-width: 16%;
   padding: 10px;
   box-sizing: border-box;
   border-right: 1px solid #ccc;
@@ -35,13 +40,6 @@
   box-sizing: border-box;
 }
 
-.left-panel button {
-  width: 100%;
-  padding: 5px;
-  font-size: 14px;
-  margin-top: 10px;
-  cursor: pointer;
-}
 
 .right-panel svg {
   width: 100%;

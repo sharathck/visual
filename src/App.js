@@ -35,7 +35,7 @@ function CustomNode({ data }) {
 
 function App() {
   const [inputText, setInputText] = useState(
-    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
+    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Receive\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
   );
 
   // Initialize nodes and edges state using React Flow hooks
@@ -139,11 +139,11 @@ function App() {
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
-        placeholder="Enter relationships in the format: Application1 -> Application2 or Application1 \\> Application2"
-        style={{ width: '100%', height: '100px' }}
+        placeholder="Enter relationships in the format: App1 -> App2 "
+        style={{ width: '18%' }}
       />
-      <button onClick={parseInput}>Parse</button>
-      <div style={{ width: '100%', height: '80vh' }}>
+      <button onClick={parseInput} style={{ writingMode: 'vertical-rl' }}>Click here to Generate Flow Diagram</button>
+      <div style={{ width: '100%' }}>
         <ReactFlowProvider>
           <ReactFlow
             nodes={nodes}
