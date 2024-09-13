@@ -1,7 +1,6 @@
 {
   "name": "application-flow-diagram",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0",
   "dependencies": {
     "@projectstorm/react-canvas-core": "^7.0.3",
     "@projectstorm/react-diagrams": "^7.0.4",
