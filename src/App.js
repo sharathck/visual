@@ -16,9 +16,9 @@ function CustomNode({ data }) {
   return (
     <div
       style={{
-        padding: 10,
-        border: '1px solid #777',
-        borderRadius: 5,
+        padding: 8,
+        border: '2px solid #777',
+        borderRadius: 6,
         backgroundColor: '#fff',
         position: 'relative',
       }}
@@ -104,6 +104,10 @@ function App() {
           targetHandle: targetHandle,
           markerEnd: {
             type: MarkerType.ArrowClosed,
+            fill: 'black',
+            strokeWidth: 3,
+            width: 20,
+            height: 20,
           },
         });
       } else {
