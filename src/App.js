@@ -11,6 +11,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './App.css';
 
+// Custom node component with handles on all sides
 function CustomNode({ data }) {
   return (
     <div
@@ -23,16 +24,18 @@ function CustomNode({ data }) {
       }}
     >
       {data.label}
-      {/* Add handles on the left and right sides */}
+      {/* Handles on all four sides */}
       <Handle type="target" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />
+      <Handle type="source" position={Position.Bottom} id="bottom" />
+      <Handle type="target" position={Position.Top} id="top" />
     </div>
   );
 }
 
 function App() {
   const [inputText, setInputText] = useState(
-    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase -> Receive\nReceive -> Payment\nPayment -> GL'
+    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Purchase\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
   );
 
   // Initialize nodes and edges state using React Flow hooks
@@ -52,8 +55,24 @@ function App() {
       const trimmedLine = line.trim();
       if (trimmedLine.length === 0) return;
 
-      // Check for relationship pattern: Application1 -> Application2
-      const match = trimmedLine.match(/^(.+?)\s*->\s*(.+)$/);
+      let match;
+      let sourceHandle = 'right';
+      let targetHandle = 'left';
+
+      // Check for side connection pattern: Application1 -> Application2
+      match = trimmedLine.match(/^(.+?)\s*->\s*(.+)$/);
+      if (match) {
+        sourceHandle = 'right';
+        targetHandle = 'left';
+      } else {
+        // Check for top-bottom connection pattern: Application1 \> Application2
+        match = trimmedLine.match(/^(.+?)\s*\\>\s*(.+)$/);
+        if (match) {
+          sourceHandle = 'bottom';
+          targetHandle = 'top';
+        }
+      }
+
       if (match) {
         const sourceApp = match[1].trim();
         const targetApp = match[2].trim();
@@ -76,13 +95,13 @@ function App() {
           };
         }
 
-        // Add edge with arrow
+        // Add edge with appropriate handles
         tempEdges.push({
           id: `e${sourceApp}-${targetApp}`,
           source: sourceApp,
           target: targetApp,
-          sourceHandle: 'right',
-          targetHandle: 'left',
+          sourceHandle: sourceHandle,
+          targetHandle: targetHandle,
           markerEnd: {
             type: MarkerType.ArrowClosed,
           },
@@ -120,7 +139,7 @@ function App() {
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
-        placeholder="Enter relationships in the format: Application1 -> Application2"
+        placeholder="Enter relationships in the format: Application1 -> Application2 or Application1 \\> Application2"
         style={{ width: '100%', height: '100px' }}
       />
       <button onClick={parseInput}>Parse</button>
