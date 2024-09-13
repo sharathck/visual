@@ -1,38 +1,74 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.left-panel {
+  flex: 0 0 20%;
+  max-width: 20%;
+  padding: 10px;
+  box-sizing: border-box;
+  border-right: 1px solid #ccc;
+}
+
+.right-panel {
+  flex: 1;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.left-panel h2,
+.right-panel h2 {
+  margin-top: 0;
+}
+
+.left-panel textarea {
+  width: 100%;
+  height: calc(100% - 80px);
+  resize: none;
+  font-size: 14px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.left-panel button {
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.right-panel svg {
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.node {
+  cursor: move;
+  user-select: none;
+}
+
+.node-box {
+  width: 150px;
+  height: 50px;
+  background-color: #cce5ff;
+  border: 1px solid #004085;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.node-label {
+  font-family: Arial;
+  font-size: 16px;
+  color: #004085;
 }
