@@ -48,6 +48,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore and Auth
 const db = getFirestore(app);
 const auth = getAuth(app);
+let yGlobal = 260;
 
 // Custom node component without x and y coordinates display
 function CustomNode({ data }) {
@@ -156,6 +157,23 @@ function App() {
     lines.forEach((line) => {
       const trimmedLine = line.trim();
       if (trimmedLine.length === 0) {
+        lineIndex++;
+        return;
+      }
+
+      // if the line does not contain -> or -}  it's a standalone application name
+      if (!trimmedLine.includes('->') && !trimmedLine.includes('-}') && !trimmedLine.includes(',')) {
+     // prefix 280, 260 to the application name
+        yGlobal = yGlobal + 50;
+        const appName = trimmedLine;
+        if (!tempNodes[appName]) {
+          tempNodes[appName] = {
+            id: appName,
+            type: 'custom', // Use the custom node type
+            data: { label: appName, lineIndex },
+            position: { x: 280, y: yGlobal },
+          };
+        }
         lineIndex++;
         return;
       }
@@ -402,15 +420,11 @@ function App() {
   useEffect(() => {
     if (!loading && inputText !== undefined) {
       parseInput();
+      setLoading(true);
     }
-  }, [inputText, loading]);
+  }, [inputText]);
 
 
-
-  // Handle input text changes
-  const handleInputTextChange = (newText) => {
-    setInputText(newText);
-  };
 
   // Authentication functions
 
@@ -484,6 +498,7 @@ function App() {
         //    <button className="signinbutton" onClick={() => saveInputTextToFirebase(user.uid, inputText)}>Save</button>
         <div className="App">
           <div className="left-panel">
+          <button className="signinbutton" onClick={parseInput}>Generate</button>
             <button className="signoutbutton" onClick={handleSignOut}>SignOut</button>
             <textarea
               value={inputText}
