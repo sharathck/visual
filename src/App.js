@@ -12,8 +12,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './App.css';
 
-// Custom node component with handles on all sides
-function CustomNode({ data, xPos, yPos }) {
+// Custom node component without x and y coordinates display
+function CustomNode({ data }) {
   return (
     <div
       style={{
@@ -21,20 +21,8 @@ function CustomNode({ data, xPos, yPos }) {
         border: '2px solid #777',
         borderRadius: 6,
         backgroundColor: '#fff',
-        position: 'relative',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          padding: '2px 4px',
-          backgroundColor: '#eee',
-          borderRadius: 3,
-        }}
-      >
-      </div>
       {data.label}
       {/* Handles on all four sides */}
       <Handle type="target" position={Position.Left} id="left" />
