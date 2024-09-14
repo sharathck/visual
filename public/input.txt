@@ -1,12 +1,9 @@
-173,226,Requisition
-376,69,Purchase
-384,233,Receive
-593,74,Payment
-639,369,GL
+276,273,Requisition
+457,201,Purchase
+462,274,Receive
+613,274,Payment
+635,387,GL
 Requisition-> Receive
 Purchase \> Receive
 Receive-> Payment
 Payment \> GL
-Receive -> GL
-Purchase -> Payment
-Purchase \> Requisition
