@@ -17,20 +17,6 @@ import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
   doc,
-  deleteDoc,
-  getDocs,
-  startAfter,
-  collection,
-  query,
-  where,
-  orderBy,
-  and,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  limit,
-  persistentLocalCache,
-  CACHE_SIZE_UNLIMITED,
   getDoc,
   setDoc,
 } from 'firebase/firestore';
@@ -312,6 +298,12 @@ function App() {
     });
   };
 
+/*  useEffect(() => {
+    if (user && inputText !== undefined) {
+      saveInputTextToFirebase(user.uid, inputText);
+    }
+  }, [inputText]);
+*/
   // Handle edge changes
   const handleEdgesChange = (changes) => {
     setEdges((eds) => {
