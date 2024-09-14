@@ -11,11 +11,11 @@
 }
 
 .left-panel {
-  flex: 0 0 12%;
-  max-width: 12%;
-  padding: 5px;
+  flex: 0 0 18%;
+  max-width: 18%;
+  padding: 4px;
   box-sizing: border-box;
-  border-right: 1px solid #ccc;
+  border-right: 2px solid #220202;
 }
 
 .right-panel {
@@ -103,3 +103,24 @@
   font-size: 18px; /* make the button text extremely small */
 }
 
+.signoutbutton {
+  background-color: rgb(237, 182, 15);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 20px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 16px; /* make the button text extremely small */
+}
+
+.signinbutton {
+  background-color: rgb(45, 129, 3);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 5px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  padding: 5px 5px;
+  font-size: 16px; /* make the button text extremely small */
+}

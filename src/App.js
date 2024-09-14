@@ -150,7 +150,7 @@ function App() {
       // replace new line with pipe
       text = text.replace(/\n/g, '|');
       const docRef = doc(db, 'diagrams', uid);
-      await setDoc(docRef, { inputText: text });
+      setDoc(docRef, { inputText: text });
     } catch (error) {
       console.error('Error saving inputText:', error);
     }
@@ -391,14 +391,18 @@ function App() {
         line: newLine,
       };
 
-      // Check if the line already exists to avoid duplicates
-      if (!lines.includes(newLine)) {
-        setEdges((eds) => [...eds, newEdge]);
-        return [...lines, newLine].join('\n');
-      } else {
-        setEdges((eds) => [...eds, newEdge]);
-        return prevText;
-      }
+
+            // Check if the line already exists to avoid duplicates
+            if (!lines.includes(newLine)) {
+              // **FIX: Update edges state directly instead of using setEdges within the callback**
+              setEdges((eds) => addEdge(newEdge, eds)); 
+              return [...lines, newLine].join('\n');
+            } else {
+              // **FIX: Update edges state directly instead of using setEdges within the callback**
+              setEdges((eds) => addEdge(newEdge, eds)); 
+              return prevText;
+            }
+
     });
   };
 
@@ -409,12 +413,7 @@ function App() {
     }
   }, [inputText, loading]);
 
-  // Save inputText to Firebase whenever it changes
-  useEffect(() => {
-    if (user && inputText !== undefined && !loading) {
-      saveInputTextToFirebase(user.uid, inputText);
-    }
-  }, [inputText]);
+
 
   // Handle input text changes
   const handleInputTextChange = (newText) => {
@@ -492,13 +491,14 @@ function App() {
         // Render the diagram editor
         <div className="App">
           <div className="left-panel">
+          <button className="signinbutton" onClick={() => saveInputTextToFirebase(user.uid, inputText)}>Save</button>
+            <button className="signoutbutton" onClick={handleSignOut}>SignOut</button>
             <textarea
               value={inputText}
               onChange={(e) => {
                 setInputText(e.target.value);
               }}
             />
-            <button onClick={handleSignOut}>SignOut</button>
           </div>
           <div className="right-panel">
             <ReactFlowProvider>
