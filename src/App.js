@@ -7,6 +7,7 @@ import ReactFlow, {
   Handle,
   Position,
   applyNodeChanges,
+  applyEdgeChanges,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './App.css';
@@ -33,7 +34,6 @@ function CustomNode({ data, xPos, yPos }) {
           borderRadius: 3,
         }}
       >
-        {`x: ${Math.round(xPos)}, y: ${Math.round(yPos)}`}
       </div>
       {data.label}
       {/* Handles on all four sides */}
@@ -52,10 +52,11 @@ function App() {
   // Refs to prevent infinite loops
   const updatingInputTextRef = useRef(false);
   const updatingNodesRef = useRef(false);
+  const updatingEdgesRef = useRef(false);
 
   // Initialize nodes and edges state
   const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useEdgesState([]);
+  const [edges, setEdges] = useState([]);
 
   // Define the custom node types
   const nodeTypes = { custom: CustomNode };
@@ -128,6 +129,9 @@ function App() {
           markerEnd: {
             type: MarkerType.ArrowClosed,
           },
+          data: {
+            line: trimmedLine,
+          },
         });
       } else {
         // Check if the line matches the coordinate pattern
@@ -162,9 +166,11 @@ function App() {
 
     // Update nodes and edges state
     updatingNodesRef.current = true;
+    updatingEdgesRef.current = true;
     setNodes(Object.values(tempNodes));
     setEdges(tempEdges);
     updatingNodesRef.current = false;
+    updatingEdgesRef.current = false;
   };
 
   // Handle node changes
@@ -211,14 +217,52 @@ function App() {
     });
   };
 
+  // Handle edge changes
+  const handleEdgesChange = (changes) => {
+    setEdges((eds) => {
+      const updatedEdges = applyEdgeChanges(changes, eds);
+
+      if (updatingEdgesRef.current) {
+        return updatedEdges;
+      }
+
+      // Check for removed edges
+      const removedEdges = changes.filter((change) => change.type === 'remove');
+
+      if (removedEdges.length > 0) {
+        updatingInputTextRef.current = true;
+
+        setInputText((prevText) => {
+          const lines = prevText.split('\n');
+          const linesSet = new Set(lines);
+
+          removedEdges.forEach((edgeChange) => {
+            const edge = eds.find((e) => e.id === edgeChange.id);
+            if (edge && edge.data && edge.data.line) {
+              linesSet.delete(edge.data.line);
+            }
+          });
+
+          return Array.from(linesSet).join('\n');
+        });
+      }
+
+      return updatedEdges;
+    });
+  };
+
   // Handle edge creation by dragging from handles
   const onConnect = (params) => {
-    setEdges((eds) =>
-      addEdge(
-        { ...params, markerEnd: { type: MarkerType.ArrowClosed } },
-        eds
-      )
-    );
+    const newEdge = {
+      id: `e${params.source}-${params.target}-${edges.length}`,
+      source: params.source,
+      target: params.target,
+      sourceHandle: params.sourceHandle,
+      targetHandle: params.targetHandle,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+      },
+    };
 
     // Now, update the inputText
     updatingInputTextRef.current = true;
@@ -247,10 +291,17 @@ function App() {
         newLine = `${sourceApp} -> ${targetApp}`;
       }
 
+      // Add the new line to the edge's data for future reference
+      newEdge.data = {
+        line: newLine,
+      };
+
       // Check if the line already exists to avoid duplicates
       if (!lines.includes(newLine)) {
+        setEdges((eds) => [...eds, newEdge]);
         return [...lines, newLine].join('\n');
       } else {
+        setEdges((eds) => [...eds, newEdge]);
         return prevText;
       }
     });
@@ -294,7 +345,7 @@ function App() {
             nodes={nodes}
             edges={edges}
             onNodesChange={handleNodesChange}
-            onEdgesChange={setEdges}
+            onEdgesChange={handleEdgesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             fitView
