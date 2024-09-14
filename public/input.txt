@@ -4,6 +4,6 @@
 613,274,Payment
 635,387,GL
 Requisition-> Receive
-Purchase \> Receive
+Purchase -} Receive
 Receive-> Payment
-Payment \> GL
+Payment -} GL
