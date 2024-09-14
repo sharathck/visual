@@ -497,6 +497,7 @@ function App() {
               setInputText(e.target.value);
             }}
           />
+          <button onClick={handleSignOut}>SignOut</button>
           </div>
           <div className="right-panel">
             <ReactFlowProvider>
