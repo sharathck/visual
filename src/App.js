@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
+  useNodesState,
   useEdgesState,
   MarkerType,
   addEdge,
@@ -82,8 +83,9 @@ function CustomNode({ data }) {
     </div>
   );
 }
-  // Define the custom node types
-  const nodeTypes = { custom: CustomNode };
+
+// Define the custom node types
+const nodeTypes = { custom: CustomNode };
 
 function App() {
   const [inputText, setInputText] = useState('');
@@ -95,9 +97,8 @@ function App() {
   const updatingEdgesRef = useRef(false);
 
   // Initialize nodes and edges state
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
-
+  const [nodes, setNodes] = useNodesState([]);
+  const [edges, setEdges] = useEdgesState([]);
 
   // Authentication state
   const [user, setUser] = useState(null);
@@ -146,7 +147,7 @@ function App() {
   // Function to save inputText to Firebase
   const saveInputTextToFirebase = async (uid, text) => {
     try {
-      // resplace new line with pipe
+      // replace new line with pipe
       text = text.replace(/\n/g, '|');
       const docRef = doc(db, 'diagrams', uid);
       await setDoc(docRef, { inputText: text });
@@ -490,14 +491,14 @@ function App() {
       {user ? (
         // Render the diagram editor
         <div className="App">
-         <div className="left-panel">
-                   <textarea
-            value={inputText}
-            onChange={(e) => {
-              setInputText(e.target.value);
-            }}
-          />
-          <button onClick={handleSignOut}>SignOut</button>
+          <div className="left-panel">
+            <textarea
+              value={inputText}
+              onChange={(e) => {
+                setInputText(e.target.value);
+              }}
+            />
+            <button onClick={handleSignOut}>SignOut</button>
           </div>
           <div className="right-panel">
             <ReactFlowProvider>
