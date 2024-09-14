@@ -52,7 +52,6 @@
 
 .node {
   cursor: move;
-  user-select: none;
 }
 
 .node-box {
@@ -71,58 +70,6 @@
   color: #004085;
 }
 
-.button {
-  padding: 2px 2px;
-  margin-left: 14px;
-  border: 1px solid black;
-  background-color: #e8ebef;
-  color: rgb(23, 82, 192);
-  box-shadow: 2px 2px 8px rgba(34, 33, 33, 0.4);
-  cursor: pointer;
-  font-size: 20px;
-}
-
-.button_selected {
-  padding: 2px 2px;
-  margin-left: 10px;
-  border: 1px solid black;
-  background-color: rgb(28, 159, 59);
-  color: white;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-  cursor: pointer;
-  font-size: 20px;
-}
-
-.addbutton {
-  background-color:rgb(16, 130, 16);
-  color: #fff;
-  cursor: pointer;
-  margin-left: 10px;
-  box-shadow: 2px 2px 8px rgba(1, 55, 20, 0.8);
-  width: 10%; /* Increase the width */
-  height: 48px; /* Increase the height */
-}
-
-.signoutbutton {
-  background-color: orange;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  margin-left: 18px;
-  padding: 5px 5px;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-  font-size: 18px; /* make the button text extremely small */
-}
-.textbutton {
-  background-color: grey;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  margin-left: 10px;
-  padding: 5px 5px;
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
-  font-size: 18px; /* make the button text extremely small */
-}
 .signonpagebutton {
   background-color: rgb(58, 111, 58);
   border: none;
