@@ -46,9 +46,8 @@ function CustomNode({ data, xPos, yPos }) {
 }
 
 function App() {
-  const [inputText, setInputText] = useState(
-    '276,273,Requisition\n457,201,Purchase\n462,274,Receive\n613,274,Payment\n635,387,GL\nRequisition-> Receive\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
-  );
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Refs to prevent infinite loops
   const updatingInputTextRef = useRef(false);
@@ -56,7 +55,7 @@ function App() {
 
   // Initialize nodes and edges state
   const [nodes, setNodes] = useState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges] = useEdgesState([]);
 
   // Define the custom node types
   const nodeTypes = { custom: CustomNode };
@@ -213,7 +212,7 @@ function App() {
   };
 
   // Handle edge creation by dragging from handles
-  const onConnect = (params) =>
+  const onConnect = (params) => {
     setEdges((eds) =>
       addEdge(
         { ...params, markerEnd: { type: MarkerType.ArrowClosed } },
@@ -221,11 +220,63 @@ function App() {
       )
     );
 
+    // Now, update the inputText
+    updatingInputTextRef.current = true;
+
+    setInputText((prevText) => {
+      const lines = prevText.split('\n');
+
+      const sourceApp = params.source;
+      const targetApp = params.target;
+      const sourceHandle = params.sourceHandle;
+      const targetHandle = params.targetHandle;
+
+      let newLine;
+      if (
+        (sourceHandle === 'right' && targetHandle === 'left') ||
+        (sourceHandle === 'left' && targetHandle === 'right')
+      ) {
+        newLine = `${sourceApp} -> ${targetApp}`;
+      } else if (
+        (sourceHandle === 'bottom' && targetHandle === 'top') ||
+        (sourceHandle === 'top' && targetHandle === 'bottom')
+      ) {
+        newLine = `${sourceApp} \\> ${targetApp}`;
+      } else {
+        // Default to right-left connection
+        newLine = `${sourceApp} -> ${targetApp}`;
+      }
+
+      // Check if the line already exists to avoid duplicates
+      if (!lines.includes(newLine)) {
+        return [...lines, newLine].join('\n');
+      } else {
+        return prevText;
+      }
+    });
+  };
+
+  // Fetch input.txt when the component mounts
+  useEffect(() => {
+    fetch('input.txt')
+      .then((response) => response.text())
+      .then((text) => {
+        setInputText(text);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching input.txt:', error);
+        setLoading(false);
+      });
+  }, []);
+
   // Parse input when it changes
   useEffect(() => {
-    parseInput();
+    if (!loading && inputText) {
+      parseInput();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText]);
+  }, [inputText, loading]);
 
   return (
     <div className="App">
@@ -243,7 +294,7 @@ function App() {
             nodes={nodes}
             edges={edges}
             onNodesChange={handleNodesChange}
-            onEdgesChange={onEdgesChange}
+            onEdgesChange={setEdges}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             fitView
