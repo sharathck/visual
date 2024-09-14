@@ -298,12 +298,12 @@ function App() {
     });
   };
 
-/*  useEffect(() => {
+  useEffect(() => {
     if (user && inputText !== undefined) {
       saveInputTextToFirebase(user.uid, inputText);
     }
   }, [inputText]);
-*/
+
   // Handle edge changes
   const handleEdgesChange = (changes) => {
     setEdges((eds) => {
@@ -481,9 +481,9 @@ function App() {
     <div>
       {user ? (
         // Render the diagram editor
+        //    <button className="signinbutton" onClick={() => saveInputTextToFirebase(user.uid, inputText)}>Save</button>
         <div className="App">
           <div className="left-panel">
-          <button className="signinbutton" onClick={() => saveInputTextToFirebase(user.uid, inputText)}>Save</button>
             <button className="signoutbutton" onClick={handleSignOut}>SignOut</button>
             <textarea
               value={inputText}
@@ -492,7 +492,7 @@ function App() {
               }}
             />
           </div>
-          <div className="right-panel">
+          <div style={{ width: '100%' }}>
             <ReactFlowProvider>
               <ReactFlow
                 nodes={nodes}
