@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
-  useNodesState,
   useEdgesState,
   MarkerType,
   addEdge,
   Handle,
   Position,
+  applyNodeChanges,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './App.css';
 
 // Custom node component with handles on all sides
-function CustomNode({ data }) {
+function CustomNode({ data, xPos, yPos }) {
   return (
     <div
       style={{
@@ -23,6 +23,18 @@ function CustomNode({ data }) {
         position: 'relative',
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          padding: '2px 4px',
+          backgroundColor: '#eee',
+          borderRadius: 3,
+        }}
+      >
+        {`x: ${Math.round(xPos)}, y: ${Math.round(yPos)}`}
+      </div>
       {data.label}
       {/* Handles on all four sides */}
       <Handle type="target" position={Position.Left} id="left" />
@@ -35,11 +47,15 @@ function CustomNode({ data }) {
 
 function App() {
   const [inputText, setInputText] = useState(
-    'Requisition\nPurchase\nReceive\nPayment\nGL\nRequisition-> Receive\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
+    '276,273,Requisition\n457,201,Purchase\n462,274,Receive\n613,274,Payment\n635,387,GL\nRequisition-> Receive\nPurchase \\> Receive\nReceive-> Payment\nPayment \\> GL'
   );
 
-  // Initialize nodes and edges state using React Flow hooks
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  // Refs to prevent infinite loops
+  const updatingInputTextRef = useRef(false);
+  const updatingNodesRef = useRef(false);
+
+  // Initialize nodes and edges state
+  const [nodes, setNodes] = useState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // Define the custom node types
@@ -47,13 +63,21 @@ function App() {
 
   // Function to parse the input text
   const parseInput = () => {
+    if (updatingInputTextRef.current) {
+      updatingInputTextRef.current = false;
+      return;
+    }
     const lines = inputText.split('\n');
     const tempNodes = {};
     const tempEdges = [];
+    let lineIndex = 0;
 
     lines.forEach((line) => {
       const trimmedLine = line.trim();
-      if (trimmedLine.length === 0) return;
+      if (trimmedLine.length === 0) {
+        lineIndex++;
+        return;
+      }
 
       let match;
       let sourceHandle = 'right';
@@ -107,22 +131,85 @@ function App() {
           },
         });
       } else {
-        // It's a standalone application name
-        const appName = trimmedLine;
-        if (!tempNodes[appName]) {
-          tempNodes[appName] = {
-            id: appName,
-            type: 'custom', // Use the custom node type
-            data: { label: appName },
-            position: { x: Math.random() * 800, y: Math.random() * 600 },
-          };
+        // Check if the line matches the coordinate pattern
+        match = trimmedLine.match(/^(\d+)\s*,\s*(\d+)\s*,\s*(.+)$/);
+        if (match) {
+          const x = parseFloat(match[1]);
+          const y = parseFloat(match[2]);
+          const label = match[3].trim();
+          if (!tempNodes[label]) {
+            tempNodes[label] = {
+              id: label,
+              type: 'custom',
+              data: { label, lineIndex },
+              position: { x, y },
+            };
+          }
+        } else {
+          // It's a standalone application name
+          const appName = trimmedLine;
+          if (!tempNodes[appName]) {
+            tempNodes[appName] = {
+              id: appName,
+              type: 'custom', // Use the custom node type
+              data: { label: appName, lineIndex },
+              position: { x: Math.random() * 800, y: Math.random() * 600 },
+            };
+          }
         }
       }
+      lineIndex++;
     });
 
     // Update nodes and edges state
+    updatingNodesRef.current = true;
     setNodes(Object.values(tempNodes));
     setEdges(tempEdges);
+    updatingNodesRef.current = false;
+  };
+
+  // Handle node changes
+  const handleNodesChange = (changes) => {
+    setNodes((nds) => {
+      const updatedNodes = applyNodeChanges(changes, nds);
+
+      if (updatingNodesRef.current) {
+        return updatedNodes;
+      }
+
+      // Update inputText when nodes are moved
+      const movedNodes = changes.filter(
+        (change) => change.type === 'position' && change.dragging === false
+      );
+
+      if (movedNodes.length > 0) {
+        updatingInputTextRef.current = true;
+
+        setInputText((prevText) => {
+          const lines = prevText.split('\n');
+          const linesMap = {};
+          lines.forEach((line, index) => {
+            linesMap[index] = line;
+          });
+
+          movedNodes.forEach((nodeChange) => {
+            const node = updatedNodes.find((n) => n.id === nodeChange.id);
+            if (node && node.data.lineIndex !== undefined) {
+              // Update the line corresponding to this node
+              const lineIndex = node.data.lineIndex;
+              const { x, y } = node.position;
+              const newLine = `${Math.round(x)},${Math.round(y)},${node.data.label}`;
+              linesMap[lineIndex] = newLine;
+            }
+          });
+
+          // Reconstruct the input text
+          return Object.values(linesMap).join('\n');
+        });
+      }
+
+      return updatedNodes;
+    });
   };
 
   // Handle edge creation by dragging from handles
@@ -134,21 +221,28 @@ function App() {
       )
     );
 
+  // Parse input when it changes
+  useEffect(() => {
+    parseInput();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputText]);
+
   return (
     <div className="App">
       <textarea
         value={inputText}
-        onChange={(e) => setInputText(e.target.value)}
-        placeholder="Enter relationships in the format: App1 -> App2 "
+        onChange={(e) => {
+          setInputText(e.target.value);
+        }}
+        placeholder="Enter relationships in the format: x,y,label or App1 -> App2 "
         style={{ width: '18%' }}
       />
-      <button onClick={parseInput} style={{ writingMode: 'vertical-rl' }}>Click here to Generate Flow Diagram</button>
       <div style={{ width: '100%' }}>
         <ReactFlowProvider>
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             nodeTypes={nodeTypes}
