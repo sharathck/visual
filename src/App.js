@@ -33,6 +33,10 @@ function CustomNode({ data }) {
   );
 }
 
+  // Define the custom node types
+  const nodeTypes = { custom: CustomNode };
+
+  
 function App() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -46,8 +50,6 @@ function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
 
-  // Define the custom node types
-  const nodeTypes = { custom: CustomNode };
 
   // Function to parse the input text
   const parseInput = () => {
