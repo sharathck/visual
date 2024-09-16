@@ -127,7 +127,6 @@ function App() {
         const docSnap = querySnapshot.docs[0];
         temp = docSnap.data().inputText;
         temp = temp.replace(/\|/g, '\n');
-        temp = temp + '\n';
         setInputText(temp);
         console.log('Fetched inputText:', docSnap.data().inputText);
       } else {
@@ -454,7 +453,7 @@ function App() {
 
   // Parse input when it changes
   useEffect(() => {
-    if (!loading && inputText !== undefined && (inputText.includes('\n') || inputText.includes('|'))) {
+    if (!loading && inputText !== undefined) {
       parseInput();
       setLoading(true);
     }
