@@ -23,6 +23,7 @@ import {
   query,
   limit,
   getDocs,
+  orderBy,
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -119,12 +120,14 @@ function App() {
   const fetchInputTextFromFirebase = async (uid) => {
     let temp = '';
     try {
-      const q = query(collection(db, 'diagrams'), where('userId', '==', uid), limit(1));
+      const myDiagramsCollectionRef = collection(db, 'diagrams', uid, 'MyDiagrams');
+      const q = query(myDiagramsCollectionRef, where('title', '==', 'first'), orderBy('modifiedDate', 'desc'), limit(1));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0];
         temp = docSnap.data().inputText;
         temp = temp.replace(/\|/g, '\n');
+        temp = temp + '\n';
         setInputText(temp);
         console.log('Fetched inputText:', docSnap.data().inputText);
       } else {
@@ -141,25 +144,37 @@ function App() {
     try {
       // Replace new line with pipe
       text = text.replace(/\n/g, '|');
-  
-      // Query to get the first available document
-      const q = query(collection(db, 'diagrams'), where('userId', '==', uid), limit(1));
-      const querySnapshot = await getDocs(q);
-      console.log('Save INput logged in user:', uid);
-      if (!querySnapshot.empty) {
-        // Update the first available document
-        console.log('Query has data');
-        const docRef = querySnapshot.docs[0].ref;
-        await setDoc(docRef, { inputText: text, userId: uid }, { merge: true });
-        console.log('Updated inputText in existing document');
-      } else {
-        // Create a new document if none exists
-        console.log('Query is empty, need to create new Document');
-        const newDocRef = doc(collection(db, 'diagrams'));
-        await setDoc(newDocRef, { inputText: text, userId: uid });
-        console.log('Created new document with inputText');
+      // Check if the user has any existing document with Document id as uid in collection diagrams
+      const existingDocRef = doc(db, 'diagrams', uid);
+      console.log('Existing document reference');
+      const existingDocSnap = await getDoc(existingDocRef);
+
+      if (!existingDocSnap.exists()) {
+        console.log('No document found with user ID as document ID');
+        await setDoc(existingDocRef, { createdAt: new Date() });
+        // create new collection with name MyDiagrams
+        console.log('Created new document with user ID as document ID');
       }
-    } catch (error) {
+        const myDiagramsCollectionRef = collection(db, 'diagrams', uid, 'MyDiagrams');
+        const q = query(myDiagramsCollectionRef,  limit(1));
+        const querySnapshot = await getDocs(q);
+        console.log('Save Input logged in user:', uid);
+        if (!querySnapshot.empty) {
+          // Update the first available document
+          console.log('Query has data');
+          const docRef = querySnapshot.docs[0].ref;
+          await setDoc(docRef, { inputText: text, modifiedDate: new Date()}, { merge: true });
+          console.log('Updated inputText in existing document');
+        } else {
+          // Create a new document if none exists
+          console.log('Query is empty, need to create new Document');
+          const newDocRef = doc(myDiagramsCollectionRef);
+          await setDoc(newDocRef, { inputText: text, title : 'first', createdDate: new Date(), modifiedDate: new Date() });
+          console.log('Created new document with inputText');
+        }
+      }
+  
+    catch (error) {
       console.error('Error saving inputText:', error);
     }
   };
@@ -338,7 +353,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (user && inputText !== undefined) {
+    if (user && inputText !== undefined && inputText.includes('\n')) {
       saveInputTextToFirebase(user.uid, inputText);
     }
   }, [inputText]);
@@ -439,7 +454,7 @@ function App() {
 
   // Parse input when it changes
   useEffect(() => {
-    if (!loading && inputText !== undefined) {
+    if (!loading && inputText !== undefined && (inputText.includes('\n') || inputText.includes('|'))) {
       parseInput();
       setLoading(true);
     }
