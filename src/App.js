@@ -16,7 +16,7 @@ import './App.css';
 import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
-  doc,
+  doc,collection,
   getDoc,
   setDoc,
 } from 'firebase/firestore';
@@ -115,7 +115,8 @@ function App() {
   const fetchInputTextFromFirebase = async (uid) => {
     let temp = '';
     try {
-      const docRef = doc(db, 'diagrams', uid);
+      const dbCollection = collection(db, 'diagrams', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'MyDiagrams');
+      const docRef = doc(dbCollection, 'ooNBnKm7SJOWxXT4263n');
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         temp = docSnap.data().inputText;
@@ -136,7 +137,8 @@ function App() {
     try {
       // replace new line with pipe
       text = text.replace(/\n/g, '|');
-      const docRef = doc(db, 'diagrams', uid);
+      const dbCollection = collection(db, 'diagrams', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'MyDiagrams');
+      const docRef = doc(dbCollection, 'ooNBnKm7SJOWxXT4263n');
       setDoc(docRef, { inputText: text });
     } catch (error) {
       console.error('Error saving inputText:', error);
