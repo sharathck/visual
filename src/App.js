@@ -18,6 +18,7 @@ import {
   getFirestore,
   doc,collection,
   getDoc,
+  where,
   setDoc,
   query,
   limit,
@@ -118,7 +119,7 @@ function App() {
   const fetchInputTextFromFirebase = async (uid) => {
     let temp = '';
     try {
-      const q = query(collection(db, 'diagrams', uid, 'MyDiagrams'), limit(1));
+      const q = query(collection(db, 'diagrams'), where('userId', '==', uid), limit(1));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0];
@@ -142,18 +143,20 @@ function App() {
       text = text.replace(/\n/g, '|');
   
       // Query to get the first available document
-      const q = query(collection(db, 'diagrams', uid, 'MyDiagrams'), limit(1));
+      const q = query(collection(db, 'diagrams'), where('userId', '==', uid), limit(1));
       const querySnapshot = await getDocs(q);
-  
+      console.log('Save INput logged in user:', uid);
       if (!querySnapshot.empty) {
         // Update the first available document
+        console.log('Query has data');
         const docRef = querySnapshot.docs[0].ref;
-        await setDoc(docRef, { inputText: text }, { merge: true });
+        await setDoc(docRef, { inputText: text, userId: uid }, { merge: true });
         console.log('Updated inputText in existing document');
       } else {
         // Create a new document if none exists
-        const newDocRef = doc(collection(db, 'diagrams', uid, 'MyDiagrams'));
-        await setDoc(newDocRef, { inputText: text });
+        console.log('Query is empty, need to create new Document');
+        const newDocRef = doc(collection(db, 'diagrams'));
+        await setDoc(newDocRef, { inputText: text, userId: uid });
         console.log('Created new document with inputText');
       }
     } catch (error) {
