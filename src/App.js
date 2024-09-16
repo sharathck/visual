@@ -19,6 +19,9 @@ import {
   doc,collection,
   getDoc,
   setDoc,
+  query,
+  limit,
+  getDocs,
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -115,16 +118,16 @@ function App() {
   const fetchInputTextFromFirebase = async (uid) => {
     let temp = '';
     try {
-      const dbCollection = collection(db, 'diagrams', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'MyDiagrams');
-      const docRef = doc(dbCollection, 'ooNBnKm7SJOWxXT4263n');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
+      const q = query(collection(db, 'diagrams', uid, 'MyDiagrams'), limit(1));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const docSnap = querySnapshot.docs[0];
         temp = docSnap.data().inputText;
         temp = temp.replace(/\|/g, '\n');
         setInputText(temp);
         console.log('Fetched inputText:', docSnap.data().inputText);
       } else {
-        console.log('No inputText found in Firebase');
+        console.log('No documents found in Firebase');
         setInputText('');
       }
     } catch (error) {
@@ -135,11 +138,24 @@ function App() {
   // Function to save inputText to Firebase
   const saveInputTextToFirebase = async (uid, text) => {
     try {
-      // replace new line with pipe
+      // Replace new line with pipe
       text = text.replace(/\n/g, '|');
-      const dbCollection = collection(db, 'diagrams', 'bTGBBpeYPmPJonItYpUOCYhdIlr1', 'MyDiagrams');
-      const docRef = doc(dbCollection, 'ooNBnKm7SJOWxXT4263n');
-      setDoc(docRef, { inputText: text });
+  
+      // Query to get the first available document
+      const q = query(collection(db, 'diagrams', uid, 'MyDiagrams'), limit(1));
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        // Update the first available document
+        const docRef = querySnapshot.docs[0].ref;
+        await setDoc(docRef, { inputText: text }, { merge: true });
+        console.log('Updated inputText in existing document');
+      } else {
+        // Create a new document if none exists
+        const newDocRef = doc(collection(db, 'diagrams', uid, 'MyDiagrams'));
+        await setDoc(newDocRef, { inputText: text });
+        console.log('Created new document with inputText');
+      }
     } catch (error) {
       console.error('Error saving inputText:', error);
     }
